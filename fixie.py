@@ -1,7 +1,7 @@
 """
 Operations to manipulate django fixtures.
 """
-import os, zipfile, json
+import sys, os, zipfile, json
 from pprint import pprint
 
 from django.db.models import get_apps, get_app, get_models, get_model
@@ -126,6 +126,10 @@ class Model(object):
                 self.remove(field)
         return log
 
+    def set_default(self, column_name, value):
+        for object in self.objects:
+            if object['fields'].get('column_name', None) is None:
+                object['fields']['column_name'] = value
 
 class Fixture(object):
     def __init__(self, name):
@@ -207,3 +211,4 @@ class Fixture(object):
         path = path or self.path
         with open(path, "w") as file:
             json.dump(self.get_objects(), file)
+
