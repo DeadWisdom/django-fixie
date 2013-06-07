@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand, CommandError
-from polls.models import Poll
 
 class Command(BaseCommand):
     args = '<path ...>'
