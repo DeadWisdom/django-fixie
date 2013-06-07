@@ -128,8 +128,9 @@ class Model(object):
 
     def set_default(self, column_name, value):
         for object in self.objects:
-            if object['fields'].get('column_name', None) is None:
-                object['fields']['column_name'] = value
+            if object['fields'].get(column_name, None) is None:
+                object['fields'][column_name] = value
+
 
 class Fixture(object):
     def __init__(self, name):
