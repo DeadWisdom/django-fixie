@@ -129,6 +129,16 @@ class Model(object):
     def set_default(self, column_name, value):
         for object in self.objects:
             if object['fields'].get(column_name, None) is None:
+                if callable(value):
+                    object['fields'][column_name] = value(object)
+                else:
+                    object['fields'][column_name] = value
+
+    def set(self, column_name, value):
+        for object in self.objects:
+            if callable(value):
+                object['fields'][column_name] = value(object)
+            else:
                 object['fields'][column_name] = value
 
 
