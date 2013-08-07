@@ -84,6 +84,9 @@ class Model(object):
         print "--------------------------------------\nModel:", self.name, "\n--------------------------------------"
         print object_str(self.schema)
 
+    def values(self, key):
+        return [obj['fields'][key] for obj in self.objects]
+
     def remove(self, column_name):
         for object in self.objects:
             try:
@@ -126,9 +129,19 @@ class Model(object):
                 self.remove(field)
         return log
 
-    def set_default(self, column_name, value):
+    def set_default(self, field, value):
         for object in self.objects:
-            if object['fields'].get(column_name, None) is None:
+            if object['fields'].get(field, None) is None:
+                if hasattr(value, '__call__'):
+                    object['fields'][field] = value(object)
+                else:
+                    object['fields'][field] = value
+
+    def set(self, column_name, value):
+        for object in self.objects:
+            if hasattr(value, '__call__'):
+                object['fields'][column_name] = value(object)
+            else:
                 object['fields'][column_name] = value
 
 
