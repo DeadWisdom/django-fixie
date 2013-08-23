@@ -12,17 +12,17 @@ Examples
 Say you've adjusted your Django models and you want to get rid of the models in your fixtures
 that aren't in your models anymore:
 
- > from fixie import Fixture
- > fixtures = Fixture("data/fixtures.json")
- > fixtures.drop_unused()
- > fixtures.save()
+    > from fixie import Fixture
+    > fixtures = Fixture("data/fixtures.json")
+    > fixtures.drop_unused()
+    > fixtures.save()
 
 
 Say you made a bunch of changes to your models and you want to see where your fixtures differ:
 
- > from fixie import Fixture
- > fixtures = Fixture("data/fixtures.json")
- > fixtures.validate()
+    > from fixie import Fixture
+    > fixtures = Fixture("data/fixtures.json")
+    > fixtures.validate()
     app.blogtag:
      model is gone
 
@@ -35,17 +35,17 @@ Say you made a bunch of changes to your models and you want to see where your fi
 
 Say you want to drop the unused fields in 'app.page':
  
- > from fixie import Fixture
- > fixtures = Fixture("data/fixtures.json")
- > fixtures['app.page'].drop_unused()
- > fixtures.save()
+    > from fixie import Fixture
+    > fixtures = Fixture("data/fixtures.json")
+    > fixtures['app.page'].drop_unused()
+    > fixtures.save()
 
 
 Say you want to look at the data in a fixture, in this example a custom user class:
 
- > from fixie import Fixture
- > fixtures = Fixture("data/fixtures.json")
- > fixtures['app.user'].view()
+    > from fixie import Fixture
+    > fixtures = Fixture("data/fixtures.json")
+    > fixtures['app.user'].view()
 
     --------------------------------------
     Model: app.user 
@@ -64,26 +64,25 @@ Say you want to look at the data in a fixture, in this example a custom user cla
 This shows example data for each field.  Some are empty, meaning that no object has any value there.  But say you wanted 
 to change all the websites to "example.com"
 
- > from fixie import Fixture
- > fixtures = Fixture("data/fixtures.json")
- > fixtures['app.user'].set('website', 'example.com')
- > fixtures.save()
+    > from fixie import Fixture
+    > fixtures = Fixture("data/fixtures.json")
+    > fixtures['app.user'].set('website', 'example.com')
+    > fixtures.save()
 
 Or maybe you want to change all the user's website to 'example.com' only if they don't already have a website.
 
- > from fixie import Fixture
- > fixtures = Fixture("data/fixtures.json")
- > fixtures['app.user'].set_default('website', 'example.com')
- > fixtures.save()
+    > from fixie import Fixture
+    > fixtures = Fixture("data/fixtures.json")
+    > fixtures['app.user'].set_default('website', 'example.com')
+    > fixtures.save()
 
 Or perhaps you want to change it to the end of their email address, for some reason, set() and set_default() allow a callable
 as a value:
 
- > from fixie import Fixture
- > def get_email(entry):
- >    return entry['fields']['email'].split('@')[1]
- >
- > fixtures = Fixture("data/fixtures.json")
- > fixtures['app.user'].set('website', get_email)
- > fixtures.save()
- 
+    > from fixie import Fixture
+    > def get_email(entry):
+    >    return entry['fields']['email'].split('@')[1]
+    >
+    > fixtures = Fixture("data/fixtures.json")
+    > fixtures['app.user'].set('website', get_email)
+    > fixtures.save()
