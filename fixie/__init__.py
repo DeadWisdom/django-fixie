@@ -76,13 +76,32 @@ class Model(object):
         self.name = name
         self.objects = objects
         self.collapse()
+        self._last_pk = None
 
     def collapse(self):
-        self.schema = reduce(merge_objects, [obj['fields'] for obj in self.objects])
+        if not self.objects:
+            self.schema = {}
+        else:
+            self.schema = reduce(merge_objects, [obj['fields'] for obj in self.objects])
 
     def view(self):
         print "--------------------------------------\nModel:", self.name, "\n--------------------------------------"
+        print self.objects[0]
         print object_str(self.schema)
+
+    def get_next_pk(self):
+        """
+        If the field is an integer field, it will get the next auto id for the model.
+        """
+        last = self._last_pk
+        if last == None:
+            last = 0
+            for obj in self.objects:
+                pk = self.objects['pk']
+                if pk > last:
+                    last = pk
+        self._last_pk = last + 1
+        return self._last_pk
 
     def remove(self, column_name):
         for object in self.objects:
@@ -97,6 +116,7 @@ class Model(object):
         return get_model(app_name, model_name)
 
     def validate(self):
+        self.collapse()
         errors = []
         model = self.get_django_model()
         if model is None:
@@ -140,6 +160,25 @@ class Model(object):
                 object['fields'][column_name] = value(object)
             else:
                 object['fields'][column_name] = value
+
+    def map(self, fn):
+        for obj in self.objects:
+            fn(obj)
+
+    def add(self, values):
+        model = self.get_django_model()
+        if model is not None:
+            for field in model._meta.fields:
+                if not field.blank and values.get(field.name) is None:
+                    raise RuntimeError("field is required: %s" % field.name)
+        obj = {
+            'model': self.name,
+            'pk': self.get_next_pk(),
+            'fields': values
+        }
+        self.objects.append(obj)
+        return obj
+
 
 
 class Fixture(object):
@@ -207,6 +246,15 @@ class Fixture(object):
         model.objects = []
         del self.models[model.name]
 
+    def rename(self, old_model, new_model):
+        model = self[old_model]
+        model.name = new_model
+        del self.models[old_model]
+        self.models[new_model] = model
+        def change_model(obj):
+            obj['model'] = new_model
+        model.map(change_model)
+
     def denormalize(self, model_name, keys, fk_model, fk):
         model = self[model_name]
         left, right = keys
@@ -218,8 +266,18 @@ class Fixture(object):
 
         print "Denormalized %s into %s -> %s\n" % (model_name, fk_model, fk)
 
-    def save(self, path=None):
+    def save(self, path=None, pretty=True):
         path = path or self.path
         with open(path, "w") as file:
-            json.dump(self.get_objects(), file)
+            if pretty:
+                json.dump(self.get_objects(), file, sort_keys=True, indent=4, separators=(',', ': '))
+            else:
+                json.dump(self.get_objects(), file)
 
+    def add_model(self, name):
+        self.models[name] = Model(name, [])
+        return self.models[name]
+
+
+def load(path):
+    return Fixture(path)
