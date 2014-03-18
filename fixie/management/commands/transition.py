@@ -16,4 +16,4 @@ class Command(BaseCommand):
         for path in [arg, "transition/%s" % arg, "transition/%s.py" % arg]:
             if os.path.exists(path):
                 return path
-        raise CommandError("Unnable to find transition: %s" % arg)
+        raise CommandError("Unnable to find transition: %s - from working directory:" % (arg, os.path.abspath('.')))
